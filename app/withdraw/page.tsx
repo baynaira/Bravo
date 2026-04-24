@@ -2,8 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { WithdrawCenter } from "@/components/withdraw-center";
 import { getSessionUser } from "@/lib/auth";
-import { getInvestorForSession } from "@/lib/db";
-import { formatCurrency } from "@/lib/format";
+import { getInvestorForSession, listWithdrawalRequests } from "@/lib/db";
 
 export default async function WithdrawPage() {
   const user = await getSessionUser();
@@ -21,37 +20,34 @@ export default async function WithdrawPage() {
     redirect("/login");
   }
 
-  return (
-    <main className="shell">
-      <section className="hero-card fade-up">
-        <div>
-          <p className="eyebrow">Withdrawal Center</p>
-          <h1>Move funds with your preferred payout method</h1>
-          <p className="muted">
-            Review available withdrawal channels and submit your preferred payout
-            destination from one secure request screen.
-          </p>
-          <div className="hero-link-row">
-            <Link className="secondary-button" href="/investor">
-              Back to dashboard
-            </Link>
-          </div>
-        </div>
-        <div className="hero-actions">
-          <div className="metric-card">
-            <span>Available balance</span>
-            <strong>${formatCurrency(investor.amount)}</strong>
-          </div>
-          <div className="metric-card">
-            <span>Account tier</span>
-            <strong>{investor.tier}</strong>
-          </div>
-        </div>
-      </section>
+  const totalPortfolio = investor.amount + investor.projectedReturn;
+  const accountProfit = Math.max(
+    totalPortfolio - investor.pendingAmount - investor.disbursedAmount,
+    0
+  );
+  const requests = await listWithdrawalRequests(investor.id);
 
-      <div className="fade-up delay-1">
-        <WithdrawCenter balance={investor.amount} tier={investor.tier} />
-      </div>
+  return (
+    <main className="shell investor-shell">
+      <section className="withdraw-shell fade-up">
+        <div className="withdraw-page-top">
+          <div>
+            <p className="eyebrow">Payout Center</p>
+            <h1>Request Your Payouts</h1>
+          </div>
+          <Link className="secondary-button" href="/investor">
+            Back
+          </Link>
+        </div>
+
+        <WithdrawCenter
+          accountProfit={accountProfit}
+          pendingAmount={investor.pendingAmount}
+          disbursedAmount={investor.disbursedAmount}
+          tier={investor.tier}
+          initialRequests={requests}
+        />
+      </section>
     </main>
   );
 }

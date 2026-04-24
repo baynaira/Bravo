@@ -9,6 +9,7 @@ function validateInvestorPayload(body: Record<string, unknown>, isCreate = true)
   const password = String(body.password || "");
   const amount = Number(body.amount);
   const projectedReturn = Number(body.projectedReturn);
+  const accountManager = String(body.accountManager || "").trim();
   const tier = String(body.tier || "").trim();
   const status = String(body.status || "").trim();
   const sendWelcomeEmail = Boolean(body.sendWelcomeEmail);
@@ -17,6 +18,7 @@ function validateInvestorPayload(body: Record<string, unknown>, isCreate = true)
     !fullName ||
     !email ||
     !tier ||
+    !accountManager ||
     !status ||
     Number.isNaN(amount) ||
     Number.isNaN(projectedReturn)
@@ -42,6 +44,7 @@ function validateInvestorPayload(body: Record<string, unknown>, isCreate = true)
     password,
     amount,
     projectedReturn,
+    accountManager,
     tier,
     status,
     sendWelcomeEmail

@@ -14,6 +14,7 @@ type FormState = {
   password: string;
   amount: string;
   projectedReturn: string;
+  accountManager: string;
   tier: string;
   status: string;
   sendWelcomeEmail: boolean;
@@ -25,6 +26,7 @@ const emptyForm: FormState = {
   password: "",
   amount: "",
   projectedReturn: "",
+  accountManager: "",
   tier: "Bronze",
   status: "Active",
   sendWelcomeEmail: true
@@ -55,6 +57,7 @@ export function AdminDashboard({
       password: form.password,
       amount: Number(form.amount),
       projectedReturn: Number(form.projectedReturn),
+      accountManager: form.accountManager,
       tier: form.tier,
       status: form.status,
       sendWelcomeEmail: form.sendWelcomeEmail
@@ -104,6 +107,7 @@ export function AdminDashboard({
       password: "",
       amount: String(investor.amount),
       projectedReturn: String(investor.projectedReturn),
+      accountManager: investor.accountManager,
       tier: investor.tier,
       status: investor.status,
       sendWelcomeEmail: false
@@ -162,7 +166,7 @@ export function AdminDashboard({
             <strong>{investors.length}</strong>
           </div>
           <div className="metric-card">
-            <span>Total assigned balance</span>
+            <span>Total initial balance</span>
             <strong>${totalAssets.toLocaleString()}</strong>
           </div>
           <button className="secondary-button" onClick={handleLogout}>
@@ -232,7 +236,7 @@ export function AdminDashboard({
 
             <div className="two-column">
               <div>
-                <label>Portfolio balance</label>
+                <label>Initial balance</label>
                 <input
                   type="number"
                   min="0"
@@ -286,6 +290,21 @@ export function AdminDashboard({
                   <option>Platinum</option>
                   <option>VIP</option>
                 </select>
+              </div>
+
+              <div>
+                <label>Admin name</label>
+                <input
+                  value={form.accountManager}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      accountManager: event.target.value
+                    }))
+                  }
+                  placeholder="Portfolio manager name"
+                  required
+                />
               </div>
             </div>
 

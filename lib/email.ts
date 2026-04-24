@@ -8,6 +8,11 @@ type WelcomeEmailInput = {
   amount: number;
 };
 
+type WithdrawalNoticeInput = {
+  fullName: string;
+  email: string;
+};
+
 function getSmtpConfig() {
   const host = process.env.SMTP_HOST;
   const port = Number(process.env.SMTP_PORT || "587");
@@ -60,9 +65,7 @@ export async function sendInvestorWelcomeEmail(input: WelcomeEmailInput) {
       `Email: ${input.email}`,
       `Password: ${input.password}`,
       `Tier: ${input.tier}`,
-      `Balance: $${formattedAmount}`,
-      "",
-      "Please sign in and change your password after your first login."
+      `Initial Balance: $${formattedAmount}`
     ].join("\n"),
     html: `
       <div style="font-family: Georgia, serif; line-height: 1.6; color: #111827;">
@@ -74,9 +77,52 @@ export async function sendInvestorWelcomeEmail(input: WelcomeEmailInput) {
           <p style="margin: 0 0 8px;"><strong>Email:</strong> ${input.email}</p>
           <p style="margin: 0 0 8px;"><strong>Password:</strong> ${input.password}</p>
           <p style="margin: 0 0 8px;"><strong>Tier:</strong> ${input.tier}</p>
-          <p style="margin: 0;"><strong>Balance:</strong> $${formattedAmount}</p>
+          <p style="margin: 0;"><strong>Initial Balance:</strong> $${formattedAmount}</p>
         </div>
-        <p>Please sign in and change your password after your first login.</p>
+      </div>
+    `
+  });
+}
+
+export async function sendWithdrawalTierNoticeEmail(
+  input: WithdrawalNoticeInput
+) {
+  const config = getSmtpConfig();
+  if (!config) {
+    throw new Error("SMTP is not configured.");
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.port === 465,
+    auth: {
+      user: config.user,
+      pass: config.pass
+    }
+  });
+
+  await transporter.sendMail({
+    from: config.from,
+    to: input.email,
+    subject: "Withdrawal request update",
+    text: [
+      `Dear ${input.fullName},`,
+      "",
+      "Withdrawal is currently unavailable on your account tier.",
+      "An account review is required to proceed.",
+      "Please contact your Admin for assistance.",
+      "",
+      "Regards,",
+      "Bravo"
+    ].join("\n"),
+    html: `
+      <div style="font-family: Georgia, serif; line-height: 1.6; color: #111827;">
+        <p>Dear ${input.fullName},</p>
+        <p>Withdrawal is currently unavailable on your account tier.</p>
+        <p>An account review is required to proceed.</p>
+        <p>Please contact your Admin for assistance.</p>
+        <p style="margin-top: 20px;">Regards,<br />Bravo</p>
       </div>
     `
   });
